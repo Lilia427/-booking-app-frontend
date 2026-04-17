@@ -3,12 +3,14 @@ import { useRoomContext } from '../context/RoomContext';
 import { hotelRules } from '../constants/data';
 import { useParams } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
+import { useState } from 'react';
 
 
 const RoomDetails = () => {
 
   const { id } = useParams(); // id get form url (/room/:id) as string...
-  const { rooms } = useRoomContext();
+  const { rooms, adults, kids, checkIn, checkOut } = useRoomContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const room = rooms.find(room => room.id === +id);
 
@@ -18,6 +20,67 @@ const RoomDetails = () => {
 
   const { name, description, facilities, price, imageLg } = room ?? {};
 
+  const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toISOString().slice(0, 10);
+  };
+
+  const cottageNameById = {
+    1: 'Котедж Полонина',
+    2: 'Котедж Затишок',
+    3: 'Котедж Верховини',
+  };
+
+  const handleReservationSubmit = async (e) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    const formData = new FormData(form);
+    const guestName = String(formData.get('name') || '').trim();
+    const phone = String(formData.get('phone') || '').trim();
+    const reservationName = cottageNameById[Number(id)] || guestName;
+
+    const payload = {
+      checkIn: formatDate(checkIn),
+      checkOut: formatDate(checkOut),
+      adults: parseInt(adults, 10) || 0,
+      children: parseInt(kids, 10) || 0,
+      roomType: reservationName,
+      name: guestName,
+      phone,
+      id,
+      status: 'pending',
+    };
+
+    if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone) {
+      alert('Please fill check-in, check-out, name and phone.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await fetch('https://api.runabooking.me/api/reservation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+
+      alert('Reservation sent successfully.');
+  form.reset();
+    } catch (error) {
+      console.error('Reservation submit error:', error);
+      // alert('Failed to send reservation. Please try again.');
+      alert(error)
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section>
 
@@ -25,7 +88,7 @@ const RoomDetails = () => {
 
       <div className='bg-room h-[560px] relative flex justify-center items-center bg-cover bg-center'>
         <div className='absolute w-full h-full bg-black/70' />
-        <h1 className='text-6xl text-white z-20 font-primary text-center'>{name} Details</h1>
+        <h1 className='text-5xl text-white z-20 font-primary text-center'>{name} Деталі</h1>
       </div>
 
 
@@ -65,17 +128,39 @@ const RoomDetails = () => {
             {/* reservation */}
             <div className='py-8 px-6 bg-accent/20 mb-12'>
 
-              <div className='flex flex-col space-y-4 mb-4'>
-                <h3>Your Reservation</h3>
-                <div className='h-[60px]'> <CheckIn /> </div>
-                <div className='h-[60px]'> <CheckOut /> </div>
-                <div className='h-[60px]'> <AdultsDropdown /> </div>
-                <div className='h-[60px]'> <KidsDropdown /> </div>
-              </div>
+              <form onSubmit={handleReservationSubmit}>
+                <div className='flex flex-col space-y-4 mb-4'>
+                  <h3>Ваше бронювання</h3>
+                  <div className='h-[60px]'> <CheckIn /> </div>
+                  <div className='h-[60px]'> <CheckOut /> </div>
+                  <div className='h-[60px]'> <AdultsDropdown /> </div>
+                  <div className='h-[60px]'> <KidsDropdown /> </div>
+                  <div className='h-[60px]'>
+                    <input
+                      type='text'
+                      name='name'
+                      // defaultValue='John Smith'
+                      placeholder='Your name'
+                      className='w-full h-full bg-white px-6 outline-none'
+                      required
+                    />
+                  </div>
+                  <div className='h-[60px]'>
+                    <input
+                      type='tel'
+                      name='phone'
+                      // defaultValue='+380991112233'
+                      placeholder='Your phone'
+                      className='w-full h-full bg-white px-6 outline-none'
+                      required
+                    />
+                  </div>
+                </div>
 
-              <button className='btn btn-lg btn-primary w-full'>
-                book now for ${price}
-              </button>
+                <button type='submit' disabled={isSubmitting} className='btn btn-lg btn-primary w-full'>
+                  {isSubmitting ? 'sending...' : `book now for $${price}`}
+                </button>
+              </form>
             </div>
 
             <div>

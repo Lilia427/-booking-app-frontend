@@ -1,13 +1,13 @@
 import { BsCalendar } from 'react-icons/bs';
-import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../style/datepicker.css';
+import { useRoomContext } from '../context/RoomContext';
 
 
 const CheckIn = () => {
 
-  const [startDate, setStartDate] = useState(false);
+  const { checkIn, setCheckIn } = useRoomContext();
 
   return (
     <div className='relative flex items-center justify-end h-full'>
@@ -18,9 +18,9 @@ const CheckIn = () => {
 
       <DatePicker
         className='w-full h-full'
-        selected={startDate}
+        selected={checkIn}
         placeholderText='Check in'
-        onChange={(date) => setStartDate(date)}
+        onChange={(date) => setCheckIn(date)}
       />
 
     </div>

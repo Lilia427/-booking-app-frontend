@@ -22,21 +22,21 @@ export const kidsList = [
 export const sliderData = [
     {
         id: 1,
-        title: 'Your Luxury Hotel For Vacation',
+        title: 'Ваш котедж для відпочинку',
         bg: images.Slider1,
-        btnNext: 'See our rooms',
+        btnNext: 'Переглянути наші кімнати',
     },
     {
         id: 2,
-        title: 'Feel Relax & Enjoy Your Luxuriousness',
+        title: 'Відчуйте релакс та насолоджуйтесь',
         bg: images.Slider2,
-        btnNext: 'See our rooms',
+        btnNext: 'Переглянути наші кімнати',
     },
     {
         id: 3,
-        title: 'Your Luxury Hotel For Vacation',
+        title: 'Ваш котедж для відпочинку',
         bg: images.Slider3,
-        btnNext: 'See our rooms',
+        btnNext: 'Переглянути наші кімнати',
     },
 ]
 

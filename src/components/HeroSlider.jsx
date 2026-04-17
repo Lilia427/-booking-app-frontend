@@ -23,11 +23,11 @@ const HeroSlider = () => {
           <SwiperSlide className='h-full relative flex justify-center items-center' key={id}>
 
             <div className='z-20 text-white text-center'>
-              <div className='uppercase font-tertiary tracking-[6px] mb-5'>Just Enjoy & Relax</div>
+              <div className='uppercase font-tertiary tracking-[6px] mb-5'>Просто насолоджуйтесь і відпочивайте</div>
               <h1 className='font-primary text-[32px] uppercase tracking-[2px] max-w-[920px] lg:text-[68px] leading-tight mb-6'>
                 {title}
               </h1>
-              <button className='btn btn-lg btn-primary mx-auto'>{btnNext}</button>
+              {/* <button className='btn btn-lg btn-primary mx-auto'>{btnNext}</button> */}
             </div>
 
             <div className='absolute top-0 w-full h-full'>

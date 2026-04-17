@@ -12,6 +12,8 @@ export const RoomContext = ({ children }) => {
 
   const [adults, setAdults] = useState('1 Adult');
   const [kids, setKids] = useState('0 Kid');
+  const [checkIn, setCheckIn] = useState(null);
+  const [checkOut, setCheckOut] = useState(null);
   const [total, setTotal] = useState(0);
 
 
@@ -21,6 +23,8 @@ export const RoomContext = ({ children }) => {
   const resetRoomFilterData = () => {
     setAdults('1 Adult');
     setKids('0 Kid');
+    setCheckIn(null);
+    setCheckOut(null);
     setRooms(roomData)
   };
 
@@ -44,6 +48,8 @@ export const RoomContext = ({ children }) => {
     rooms, loading,
     adults, setAdults,
     kids, setKids,
+    checkIn, setCheckIn,
+    checkOut, setCheckOut,
     handleCheck,
     resetRoomFilterData,
   };

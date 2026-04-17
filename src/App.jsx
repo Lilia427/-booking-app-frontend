@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes, } from 'react-router-dom';
 import { Footer, Header, PageNotFound } from './components';
-import { Home, RoomDetails } from './pages';
+import { Home, RoomDetails, Login, Admin } from './pages';
 
 
 const App = () => {
@@ -19,12 +19,18 @@ const App = () => {
     <main className=''>
       <BrowserRouter>
 
-        <Header />
+        {/* <Header /> */}
 
         <Routes>
           <Route path={'/'} element={<Home />} />
+         
           <Route path={'/room/:id'} element={<RoomDetails />} />
-          <Route path={'*'} element={<PageNotFound />} />
+         
+
+           <Route path={'/admin-login'} element={<Login />} />
+           <Route path={'/admin'} element={<Admin />} />
+
+            <Route path={'*'} element={<PageNotFound />} />
         </Routes>
 
         <Footer />
