@@ -1,6 +1,5 @@
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown, ScrollToTop } from '../components';
 import { useRoomContext } from '../context/RoomContext';
-import { hotelRules } from '../constants/data';
 import { useParams } from 'react-router-dom';
 import { FaCheck } from 'react-icons/fa';
 import { useState } from 'react';
@@ -18,11 +17,20 @@ const RoomDetails = () => {
   //   console.log(key);
   // }
 
-  const { name, description, facilities, price, imageLg } = room ?? {};
+  const { name, description, facilities, price, imageLg, gallery } = room ?? {};
+
+  const roomGallery = Array.isArray(gallery) && gallery.length
+    ? gallery
+    : [imageLg].filter(Boolean);
 
   const formatDate = (date) => {
     if (!date) return '';
-    return new Date(date).toISOString().slice(0, 10);
+    const parsedDate = new Date(date);
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = String(parsedDate.getFullYear()).slice(-2);
+
+    return `${day}${month}${year}`;
   };
 
   const cottageNameById = {
@@ -30,6 +38,14 @@ const RoomDetails = () => {
     2: 'Котедж Затишок',
     3: 'Котедж Верховини',
   };
+
+  const hotelRulesUa = [
+    'Заселення після 14:00, виселення до 11:00.',
+    'Будь ласка, дотримуйтеся тиші з 22:00 до 08:00.',
+    'Куріння в приміщенні заборонене.',
+    'Бережно ставтеся до майна котеджу.',
+    'Проживання з тваринами можливе за попереднім погодженням.',
+  ];
 
   const handleReservationSubmit = async (e) => {
     e.preventDefault();
@@ -100,11 +116,22 @@ const RoomDetails = () => {
 
             <h2 className='h2'>{name}</h2>
             <p className='mb-8'>{description}</p>
-            <img className='mb-8' src={imageLg} alt="roomImg" />
+            <div className='flex flex-col gap-6 mb-8'>
+              {
+                roomGallery.map((img, index) => (
+                  <img
+                    key={`${name}-photo-${index}`}
+                    className='w-full h-[340px] lg:h-[420px] object-cover rounded-md'
+                    src={img}
+                    alt={`${name} фото ${index + 1}`}
+                  />
+                ))
+              }
+            </div>
 
             <div className='mt-12'>
               <h3 className='h3 mb-3'></h3>
-              <p className='mb-12'> Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis accusantium sapiente quas quos explicabo, odit nostrum? Reiciendis illum dolor eos dicta. Illum vero at hic nostrum sint et quod porro. </p>
+              <p className='mb-12'>Цей котедж ідеально підходить для спокійного відпочинку в будь-яку пору року. Просторий інтер&apos;єр, зручне планування та продумані деталі створюють комфортну атмосферу для пар, сімей і невеликих компаній. Тут легко поєднати затишок, тишу та якісний сервіс, щоб повністю насолодитися відпусткою.</p>
 
               {/* icons grid */}
               <div className="grid grid-cols-3 gap-6 mb-12">
@@ -140,7 +167,7 @@ const RoomDetails = () => {
                       type='text'
                       name='name'
                       // defaultValue='John Smith'
-                      placeholder='Your name'
+                      placeholder='Ваше імʼя'
                       className='w-full h-full bg-white px-6 outline-none'
                       required
                     />
@@ -150,7 +177,7 @@ const RoomDetails = () => {
                       type='tel'
                       name='phone'
                       // defaultValue='+380991112233'
-                      placeholder='Your phone'
+                      placeholder='Ваш номер телефону'
                       className='w-full h-full bg-white px-6 outline-none'
                       required
                     />
@@ -158,26 +185,24 @@ const RoomDetails = () => {
                 </div>
 
                 <button type='submit' disabled={isSubmitting} className='btn btn-lg btn-primary w-full'>
-                  {isSubmitting ? 'sending...' : `book now for $${price}`}
+                  {isSubmitting ? 'відправка...' : `Резерв за ${price} грн`}
                 </button>
               </form>
             </div>
 
             <div>
-              <h3 className='h3'>Hotel Rules</h3>
+              <h3 className='h3'>Правила проживання</h3>
               <p className='mb-6 text-justify'>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi dolores iure fugiat eligendi illo est, aperiam quasi distinctio necessitatibus suscipit nemo provident eaque voluptas earum.
+                Щоб відпочинок був комфортним для всіх гостей, просимо ознайомитися з основними правилами проживання. Вони прості та допомагають зберегти затишок, чистоту і спокійну атмосферу на території котеджу.
               </p>
 
               <ul className='flex flex-col gap-y-4'>
-                {
-                  hotelRules.map(({ rules }, idx) =>
-                    <li key={idx} className='flex items-center gap-x-4'>
-                      <FaCheck className='text-accent' />
-                      {rules}
-                    </li>
-                  )
-                }
+                {hotelRulesUa.map((rule, idx) => (
+                  <li key={idx} className='flex items-center gap-x-4'>
+                    <FaCheck className='text-accent' />
+                    {rule}
+                  </li>
+                ))}
               </ul>
             </div>
 
