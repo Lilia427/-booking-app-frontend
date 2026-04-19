@@ -14,7 +14,7 @@ const KidsDropdown = () => {
 
 
       <Menu.Button className='w-full h-full flex items-center justify-between px-8'>
-        {kids === '0 Kid' ? 'No Kid' : kids}
+        {kids === '0 дітей' ? 'Без дітей' : kids}
         <BsChevronDown className='text-base text-accent-hover' />
       </Menu.Button>
 

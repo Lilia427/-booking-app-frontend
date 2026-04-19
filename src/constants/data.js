@@ -3,19 +3,19 @@ import images from "../assets";
 
 
 export const adultsList = [
-    { name: '1 Adult' },
-    { name: '2 Adults' },
-    { name: '3 Adults' },
-    { name: '4 Adults' },
+    { name: '1 дорослий' },
+    { name: '2 дорослих' },
+    { name: '3 дорослих' },
+    { name: '4 дорослих' },
 ]
 
 
 export const kidsList = [
-    { name: '0 Kid' },
-    { name: '1 Kid' },
-    { name: '2 Kids' },
-    { name: '3 Kids' },
-    { name: '4 Kids' },
+    { name: '0 дітей' },
+    { name: '1 дитина' },
+    { name: '2 дітей' },
+    { name: '3 дітей' },
+    { name: '4 дітей' },
 ]
 
 

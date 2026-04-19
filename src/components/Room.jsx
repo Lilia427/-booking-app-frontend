@@ -22,8 +22,8 @@ const Room = ({ room }) => {
               <BsArrowsFullscreen className='text-[15px]' />
             </div>
             <div className='flex gap-x-1'>
-              <div>Size</div>
-              <div>{size}m2</div>
+              <div>Площа</div>
+              <div>{size} м²</div>
             </div>
           </div>
 
@@ -32,7 +32,7 @@ const Room = ({ room }) => {
               <BsPeople className='text-[18px]' />
             </div>
             <div className='flex gap-x-1'>
-              <div>Max people</div>
+              <div>Макс. людей</div>
               <div>{maxPerson}</div>
             </div>
           </div>
@@ -55,9 +55,9 @@ const Room = ({ room }) => {
       {/* button */}
       <Link
         to={`/room/${id}`}
-        className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300"
+        className="btn btn-secondary btn-sm max-w-[240px] mx-auto duration-300 normal-case text-center flex justify-center"
       >
-        Book now from ${price}
+        Резерв від {price} грн
       </Link>
 
     </div>
