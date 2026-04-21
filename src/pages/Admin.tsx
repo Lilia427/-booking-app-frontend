@@ -9,7 +9,8 @@ interface Reservation {
   checkOut: string
   adults: number
   children: number
-  roomType: string
+  roomType: string | number
+  roomName?: string
   status: string
 }
 
@@ -232,7 +233,9 @@ const Admin: React.FC = () => {
                       )}
                     </td>
 
-                    <td className='px-6 py-4 capitalize text-slate-200 font-medium'>{r.roomType}</td>
+                    <td className='px-6 py-4 text-slate-200 font-medium'>
+                      {r.roomName || `Room ${r.roomType}`}
+                    </td>
 
                     <td className='px-6 py-4'>
                       <span className={`rounded-full px-3 py-1 text-lg font-semibold capitalize ${statusStyle[r.status] ?? 'bg-slate-700 text-slate-300'}`}>
@@ -282,6 +285,7 @@ const Admin: React.FC = () => {
                   { label: 'Check Out', key: 'checkOut', type: 'date' },
                   { label: 'Adults', key: 'adults', type: 'number' },
                   { label: 'Children', key: 'children', type: 'number' },
+                  { label: 'Room Name', key: 'roomName', type: 'text' },
                   { label: 'Room Type', key: 'roomType', type: 'text' },
                 ] as { label: string; key: keyof Reservation; type: string }[]
               ).map(({ label, key, type }) => (

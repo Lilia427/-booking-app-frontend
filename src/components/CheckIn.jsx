@@ -5,9 +5,20 @@ import '../style/datepicker.css';
 import { useRoomContext } from '../context/RoomContext';
 
 
-const CheckIn = () => {
+const CheckIn = ({ excludedDateIntervals = [] }) => {
 
-  const { checkIn, setCheckIn } = useRoomContext();
+  const { checkIn, checkOut, setCheckIn, setCheckOut } = useRoomContext();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const handleCheckInChange = (date) => {
+    setCheckIn(date);
+
+    if (checkOut && date && checkOut < date) {
+      setCheckOut(null);
+    }
+  };
 
   return (
     <div className='relative flex items-center justify-end h-full'>
@@ -19,8 +30,10 @@ const CheckIn = () => {
       <DatePicker
         className='w-full h-full'
         selected={checkIn}
+        minDate={today}
+        excludeDateIntervals={excludedDateIntervals}
         placeholderText='Дата заїзду'
-        onChange={(date) => setCheckIn(date)}
+        onChange={handleCheckInChange}
       />
 
     </div>

@@ -1,8 +1,8 @@
 import { AdultsDropdown, CheckIn, CheckOut, KidsDropdown, ScrollToTop } from '../components';
 import { useRoomContext } from '../context/RoomContext';
 import { useParams } from 'react-router-dom';
-import { FaCheck } from 'react-icons/fa';
-import { useState } from 'react';
+import { FaCheck, FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 
 const RoomDetails = () => {
@@ -10,6 +10,13 @@ const RoomDetails = () => {
   const { id } = useParams(); // id get form url (/room/:id) as string...
   const { rooms, adults, kids, checkIn, checkOut } = useRoomContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookedDateRanges, setBookedDateRanges] = useState([]);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
 
   const room = rooms.find(room => room.id === +id);
 
@@ -23,14 +30,20 @@ const RoomDetails = () => {
     ? gallery
     : [imageLg].filter(Boolean);
 
-  const formatDate = (date) => {
+  const roomTypeId = Number(id);
+
+  const formatDateForApi = (date) => {
     if (!date) return '';
     const parsedDate = new Date(date);
-    const day = String(parsedDate.getDate()).padStart(2, '0');
-    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-    const year = String(parsedDate.getFullYear());
+    if (Number.isNaN(parsedDate.getTime())) return '';
 
-    return `${day}/${month}/${year}`;
+    const dateOnly = new Date(
+      parsedDate.getFullYear(),
+      parsedDate.getMonth(),
+      parsedDate.getDate()
+    );
+
+    return dateOnly.toISOString();
   };
 
   const cottageNameById = {
@@ -38,6 +51,99 @@ const RoomDetails = () => {
     2: 'Котедж Затишок',
     3: 'Котедж Верховини',
   };
+
+  const parseApiDate = (value) => {
+    if (!value) return null;
+
+    // Supports both YYYY-MM-DD and ISO date-time strings.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  };
+
+  const normalizeDateOnly = (value) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  };
+
+  const rangesOverlap = (startA, endA, startB, endB) => {
+    return startA <= endB && startB <= endA;
+  };
+
+  const isValidPhoneNumber = (value) => {
+    const normalized = String(value || '').replace(/[\s()-]/g, '');
+    return /^\+?\d{10,15}$/.test(normalized);
+  };
+
+  const showModal = ({ title, message, type = 'error' }) => {
+    setModalState({ isOpen: true, title, message, type });
+  };
+
+  const closeModal = () => {
+    setModalState((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const loadBookedDates = useCallback(async (signal) => {
+    if (!roomTypeId) {
+      setBookedDateRanges([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.runabooking.me/api/reservation/booked-dates/${roomTypeId}`,
+        signal ? { signal } : undefined
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to load booked dates: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const intervals = Array.isArray(data)
+        ? data
+            .map((item) => {
+              const start = parseApiDate(item.checkIn);
+              const end = parseApiDate(item.checkOut);
+
+              if (!start || !end) return null;
+
+              return {
+                start: start <= end ? start : end,
+                end: end >= start ? end : start,
+              };
+            })
+            .filter(Boolean)
+        : [];
+
+      setBookedDateRanges(intervals);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Booked dates load error:', error);
+        setBookedDateRanges([]);
+      }
+    }
+  }, [roomTypeId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    loadBookedDates(controller.signal);
+
+    return () => controller.abort();
+  }, [loadBookedDates]);
+
+  const excludedDateIntervals = useMemo(
+    () => bookedDateRanges.map((range) => ({ start: range.start, end: range.end })),
+    [bookedDateRanges]
+  );
 
   const hotelRulesUa = [
     'Заселення після 14:00, виселення до 11:00.',
@@ -55,22 +161,64 @@ const RoomDetails = () => {
     const formData = new FormData(form);
     const guestName = String(formData.get('name') || '').trim();
     const phone = String(formData.get('phone') || '').trim();
-    const reservationName = cottageNameById[Number(id)] || guestName;
+    const reservationName = cottageNameById[roomTypeId] || name || guestName;
 
     const payload = {
-      checkIn: formatDate(checkIn),
-      checkOut: formatDate(checkOut),
+      checkIn: formatDateForApi(checkIn),
+      checkOut: formatDateForApi(checkOut),
       adults: parseInt(adults, 10) || 0,
       children: parseInt(kids, 10) || 0,
-      roomType: reservationName,
+      roomType: roomTypeId,
+      roomName: reservationName,
       name: guestName,
       phone,
-      id,
       status: 'pending',
     };
 
     if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone) {
-      alert('Please fill check-in, check-out, name and phone.');
+      showModal({
+        title: 'Перевірте форму',
+        message: 'Вкажіть дати заїзду/виїзду, імʼя та номер телефону.',
+      });
+      return;
+    }
+
+    if (!isValidPhoneNumber(payload.phone)) {
+      showModal({
+        title: 'Некоректний номер',
+        message: 'Введіть коректний номер телефону у форматі +380XXXXXXXXX або 0XXXXXXXXX.',
+      });
+      return;
+    }
+
+    const selectedCheckIn = normalizeDateOnly(checkIn);
+    const selectedCheckOut = normalizeDateOnly(checkOut);
+
+    if (!selectedCheckIn || !selectedCheckOut) {
+      showModal({
+        title: 'Некоректні дати',
+        message: 'Оберіть коректні дати заїзду та виїзду.',
+      });
+      return;
+    }
+
+    if (selectedCheckOut < selectedCheckIn) {
+      showModal({
+        title: 'Некоректний діапазон',
+        message: 'Дата виїзду не може бути раніше дати заїзду.',
+      });
+      return;
+    }
+
+    const hasDateConflict = bookedDateRanges.some((range) =>
+      rangesOverlap(selectedCheckIn, selectedCheckOut, range.start, range.end)
+    );
+
+    if (hasDateConflict) {
+      showModal({
+        title: 'Дати недоступні',
+        message: 'Обраний період уже заброньований. Будь ласка, оберіть інші дати.',
+      });
       return;
     }
 
@@ -85,13 +233,35 @@ const RoomDetails = () => {
         body: JSON.stringify(payload),
       });
 
+      if (!response.ok) {
+        let serverMessage = `Reservation failed (${response.status}).`;
 
-      alert('Reservation sent successfully.');
-  form.reset();
+        try {
+          const errorData = await response.json();
+          if (errorData?.message) {
+            serverMessage = errorData.message;
+          }
+        } catch (_parseError) {
+          // Keep default message when backend returns non-JSON body.
+        }
+
+        throw new Error(serverMessage);
+      }
+
+
+      showModal({
+        title: 'Бронювання відправлено',
+        message: 'Дякуємо! Ми отримали заявку і скоро з вами звʼяжемось.',
+        type: 'success',
+      });
+      await loadBookedDates();
+      form.reset();
     } catch (error) {
       console.error('Reservation submit error:', error);
-      // alert('Failed to send reservation. Please try again.');
-      alert(error)
+      showModal({
+        title: 'Помилка відправки',
+        message: error instanceof Error ? error.message : 'Не вдалося відправити бронювання. Спробуйте ще раз.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -158,8 +328,8 @@ const RoomDetails = () => {
               <form onSubmit={handleReservationSubmit}>
                 <div className='flex flex-col space-y-4 mb-4'>
                   <h3>Ваше бронювання</h3>
-                  <div className='h-[60px]'> <CheckIn /> </div>
-                  <div className='h-[60px]'> <CheckOut /> </div>
+                  <div className='h-[60px]'> <CheckIn excludedDateIntervals={excludedDateIntervals} /> </div>
+                  <div className='h-[60px]'> <CheckOut excludedDateIntervals={excludedDateIntervals} /> </div>
                   <div className='h-[60px]'> <AdultsDropdown /> </div>
                   <div className='h-[60px]'> <KidsDropdown /> </div>
                   <div className='h-[60px]'>
@@ -179,6 +349,10 @@ const RoomDetails = () => {
                       // defaultValue='+380991112233'
                       placeholder='Ваш номер телефону'
                       className='w-full h-full bg-white px-6 outline-none'
+                      pattern='^\+?[0-9\s()\-]{10,20}$'
+                      title='Введіть номер телефону: +380XXXXXXXXX або 0XXXXXXXXX'
+                      inputMode='tel'
+                      autoComplete='tel'
                       required
                     />
                   </div>
@@ -210,6 +384,55 @@ const RoomDetails = () => {
 
         </div>
       </div>
+
+      {modalState.isOpen && (
+        <div className='fixed inset-0 z-[100] flex items-center justify-center px-4'>
+          <button
+            type='button'
+            className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+            onClick={closeModal}
+            aria-label='Close modal backdrop'
+          />
+
+          <div className='relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-[fadeIn_.25s_ease]'>
+            <button
+              type='button'
+              onClick={closeModal}
+              className='absolute right-4 top-4 text-gray-400 transition hover:text-gray-700'
+              aria-label='Close modal'
+            >
+              <FaTimes />
+            </button>
+
+            <div className='mb-4 flex items-center gap-3'>
+              <div
+                className={`grid h-11 w-11 place-items-center rounded-full ${
+                  modalState.type === 'success'
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-red-100 text-red-600'
+                }`}
+              >
+                {modalState.type === 'success' ? <FaCheckCircle /> : <FaExclamationCircle />}
+              </div>
+              <h4 className='text-xl font-semibold text-primary'>{modalState.title}</h4>
+            </div>
+
+            <p className='mb-6 text-[15px] leading-relaxed text-gray-600'>{modalState.message}</p>
+
+            <button
+              type='button'
+              onClick={closeModal}
+              className={`w-full rounded-lg px-4 py-3 text-sm font-semibold text-white transition ${
+                modalState.type === 'success'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-primary hover:bg-primary/90'
+              }`}
+            >
+              Зрозуміло
+            </button>
+          </div>
+        </div>
+      )}
 
     </section>
   );
