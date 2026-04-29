@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FaCheck, FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+const COTTAGES_API_URL = 'https://api.runabooking.me/api/cottages';
 
 const RoomDetails = () => {
 
@@ -11,6 +12,7 @@ const RoomDetails = () => {
   const { rooms, adults, kids, checkIn, checkOut } = useRoomContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookedDateRanges, setBookedDateRanges] = useState([]);
+  const [apiCottage, setApiCottage] = useState(null);
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: '',
@@ -19,18 +21,58 @@ const RoomDetails = () => {
   });
 
   const room = rooms.find(room => room.id === +id);
-
-  // for (const key in room) {
-  //   console.log(key);
-  // }
-
-  const { name, description, facilities, price, imageLg, gallery } = room ?? {};
-
-  const roomGallery = Array.isArray(gallery) && gallery.length
-    ? gallery
-    : [imageLg].filter(Boolean);
-
   const roomTypeId = Number(id);
+
+  useEffect(() => {
+    if (!roomTypeId) {
+      setApiCottage(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadCottageById = async () => {
+      try {
+        const response = await fetch(`${COTTAGES_API_URL}/${id}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load cottage by id: ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        const entity = data?.data ?? data;
+        setApiCottage(entity ?? null);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Cottage details load error:', error);
+          setApiCottage(null);
+        }
+      }
+    };
+
+    loadCottageById();
+
+    return () => controller.abort();
+  }, [roomTypeId]);
+
+  const name = apiCottage?.name || room?.name;
+  const description = apiCottage?.description || room?.description;
+  const facilities = room?.facilities ?? [];
+  const price = apiCottage?.pricePerNight ?? room?.price;
+  const imageLg = room?.imageLg;
+  const gallery = room?.gallery;
+
+  const apiImageUrls = Array.isArray(apiCottage?.imageUrls)
+    ? apiCottage.imageUrls.filter((img) => typeof img === 'string' && img.trim().length > 0)
+    : [];
+
+  const roomGallery = apiImageUrls.length
+    ? apiImageUrls
+    : Array.isArray(gallery) && gallery.length
+      ? gallery
+      : [imageLg].filter(Boolean);
 
   const formatDateForApi = (date) => {
     if (!date) return '';
@@ -144,6 +186,20 @@ const RoomDetails = () => {
     () => bookedDateRanges.map((range) => ({ start: range.start, end: range.end })),
     [bookedDateRanges]
   );
+
+  const selectedDays = useMemo(() => {
+    const start = normalizeDateOnly(checkIn);
+    const end = normalizeDateOnly(checkOut);
+
+    if (!start || !end) return 1;
+
+    const diffInMs = end.getTime() - start.getTime();
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+
+    return diffInDays > 0 ? diffInDays : 1;
+  }, [checkIn, checkOut]);
+
+  const totalPrice = (Number(price) || 0) * selectedDays;
 
   const hotelRulesUa = [
     'Заселення після 14:00, виселення до 11:00.',
@@ -289,12 +345,13 @@ const RoomDetails = () => {
             <div className='flex flex-col gap-6 mb-8'>
               {
                 roomGallery.map((img, index) => (
-                  <img
-                    key={`${name}-photo-${index}`}
-                    className='w-full h-[340px] lg:h-[420px] object-cover rounded-md'
-                    src={img}
-                    alt={`${name} фото ${index + 1}`}
-                  />
+                  <figure key={`${name}-photo-${index}`} className='w-full'>
+                    <img
+                      className='w-full h-[340px] lg:h-[420px] object-cover rounded-md'
+                      src={img}
+                      alt={`${name} фото ${index + 1}`}
+                    />
+                  </figure>
                 ))
               }
             </div>
@@ -359,7 +416,7 @@ const RoomDetails = () => {
                 </div>
 
                 <button type='submit' disabled={isSubmitting} className='btn btn-lg btn-primary w-full'>
-                  {isSubmitting ? 'відправка...' : `Резерв за ${price} грн`}
+                  {isSubmitting ? 'відправка...' : `Резерв за ${totalPrice} грн`}
                 </button>
               </form>
             </div>
