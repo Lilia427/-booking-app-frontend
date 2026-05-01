@@ -216,7 +216,6 @@ const RoomDetails = () => {
     const formData = new FormData(form);
     const guestName = String(formData.get('name') || '').trim();
     const phone = String(formData.get('phone') || '').trim();
-    const email = String(formData.get('email') || '').trim();
     const reservationName = cottageNameById[roomTypeId] || name || guestName;
 
     const payload = {
@@ -231,10 +230,10 @@ const RoomDetails = () => {
       status: 'pending',
     };
 
-    if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone || !payload.email) {
+    if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone) {
       showModal({
         title: 'Перевірте форму',
-        message: 'Вкажіть дати заїзду/виїзду, імʼя, номер телефону та email.',
+        message: 'Вкажіть дати заїзду/виїзду, імʼя та номер телефону.',
       });
       return;
     }
