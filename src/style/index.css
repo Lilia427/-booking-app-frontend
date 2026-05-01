@@ -42,7 +42,7 @@
   }
 
   .h3 {
-    @apply text-2xl font-primary font-semibold tracking-[1px] mb-2;
+    @apply text-2xl font-primary tracking-[1px] mb-2;
   }
 
   .btn {

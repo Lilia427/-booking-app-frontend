@@ -228,7 +228,6 @@ const RoomDetails = () => {
       roomName: reservationName,
       name: guestName,
       phone,
-      email,
       status: 'pending',
     };
 
@@ -328,7 +327,10 @@ const RoomDetails = () => {
 
       <ScrollToTop />
 
-      <div className='bg-room h-[560px] relative flex justify-center items-center bg-cover bg-center'>
+      <div
+        className='h-[560px] relative flex justify-center items-center bg-cover bg-center'
+        style={roomGallery[0] ? { backgroundImage: `url(${roomGallery[0]})` } : undefined}
+      >
         <div className='absolute w-full h-full bg-black/70' />
         <h1 className='text-5xl text-white z-20 font-primary text-center'>{name} Деталі</h1>
       </div>
@@ -391,16 +393,6 @@ const RoomDetails = () => {
                       name='name'
                       placeholder='Ваше імʼя'
                       className='w-full h-full bg-white px-6 outline-none'
-                      required
-                    />
-                  </div>
-                  <div className='h-[60px]'>
-                    <input
-                      type='email'
-                      name='email'
-                      placeholder='Ваш email'
-                      className='w-full h-full bg-white px-6 outline-none'
-                      autoComplete='email'
                       required
                     />
                   </div>

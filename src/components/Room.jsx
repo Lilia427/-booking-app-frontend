@@ -12,7 +12,7 @@ const Room = ({ room }) => {
     <div className='bg-white shadow-2xl min-h-[500px] group'>
 
       <div className='overflow-hidden'>
-        <img src={displayImage} alt="img" className='group-hover:scale-110 transition-all duration-300 w-full' />
+        <img src={displayImage} alt="img" className='group-hover:scale-110 transition-all duration-300 w-full h-[220px] object-cover' />
       </div>
 
 
@@ -36,7 +36,7 @@ const Room = ({ room }) => {
 
       <div className='text-center'>
         <Link to={`/room/${id}`}>
-          <h3 className="h3">{name}</h3>
+          <p className="h3">{name}</p>
         </Link>
 
         <p className='max-w-[300px] mx-auto mb-3 lg:mb-6'>{description?.length > 56 ? description.slice(0, 56) + '..' : description}</p>

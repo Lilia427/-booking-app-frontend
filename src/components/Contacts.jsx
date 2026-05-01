@@ -57,7 +57,7 @@ const Contacts = () => {
           <div className='lg:w-2/3 h-[400px] rounded-xl overflow-hidden shadow-lg'>
             <iframe
               title='Runa Booking Map'
-              src='https://maps.google.com/maps?q=48.2663,24.5688&z=17&output=embed'
+              src='https://maps.google.com/maps?q=48.27536283742655,24.577044657407484&z=17&output=embed'
               width='100%'
               height='100%'
               style={{ border: 0 }}
