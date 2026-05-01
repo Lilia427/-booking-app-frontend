@@ -26,11 +26,9 @@ const Header = () => {
 
       <div className='container mx-auto flex flex-col lg:flex-row items-center lg:justify-between gap-y-6 lg:gap-y-0'>
 
-        {/* Logo */}
         <Link to="/" onClick={resetRoomFilterData}>
         </Link>
 
-        {/* Nav */}
         <nav className={`${header ? 'text-primary' : 'text-white'}
         flex gap-x-4 lg:gap-x-8 font-tertiary tracking-[3px] text-[15px] items-center uppercase`}>
           {

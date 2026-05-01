@@ -8,7 +8,7 @@ const COTTAGES_API_URL = 'https://api.runabooking.me/api/cottages';
 
 const RoomDetails = () => {
 
-  const { id } = useParams(); // id get form url (/room/:id) as string...
+  const { id } = useParams();
   const { rooms, adults, kids, checkIn, checkOut } = useRoomContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookedDateRanges, setBookedDateRanges] = useState([]);
@@ -97,7 +97,6 @@ const RoomDetails = () => {
   const parseApiDate = (value) => {
     if (!value) return null;
 
-    // Supports both YYYY-MM-DD and ISO date-time strings.
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       const [year, month, day] = value.split('-').map(Number);
       return new Date(year, month - 1, day);
@@ -217,6 +216,7 @@ const RoomDetails = () => {
     const formData = new FormData(form);
     const guestName = String(formData.get('name') || '').trim();
     const phone = String(formData.get('phone') || '').trim();
+    const email = String(formData.get('email') || '').trim();
     const reservationName = cottageNameById[roomTypeId] || name || guestName;
 
     const payload = {
@@ -228,13 +228,14 @@ const RoomDetails = () => {
       roomName: reservationName,
       name: guestName,
       phone,
+      email,
       status: 'pending',
     };
 
-    if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone) {
+    if (!payload.checkIn || !payload.checkOut || !payload.name || !payload.phone || !payload.email) {
       showModal({
         title: 'Перевірте форму',
-        message: 'Вкажіть дати заїзду/виїзду, імʼя та номер телефону.',
+        message: 'Вкажіть дати заїзду/виїзду, імʼя, номер телефону та email.',
       });
       return;
     }
@@ -298,7 +299,6 @@ const RoomDetails = () => {
             serverMessage = errorData.message;
           }
         } catch (_parseError) {
-          // Keep default message when backend returns non-JSON body.
         }
 
         throw new Error(serverMessage);
@@ -337,7 +337,6 @@ const RoomDetails = () => {
       <div className='container mx-auto'>
         <div className='flex flex-col lg:flex-row lg:gap-x-8 h-full py-24'>
 
-          {/* ⬅️⬅️⬅️ left side ⬅️⬅️⬅️ */}
           <div className='w-full lg:w-[60%] h-full text-justify'>
 
             <h2 className='h2'>{name}</h2>
@@ -360,7 +359,6 @@ const RoomDetails = () => {
               <h3 className='h3 mb-3'></h3>
               <p className='mb-12'>Цей котедж ідеально підходить для спокійного відпочинку в будь-яку пору року. Просторий інтер&apos;єр, зручне планування та продумані деталі створюють комфортну атмосферу для пар, сімей і невеликих компаній. Тут легко поєднати затишок, тишу та якісний сервіс, щоб повністю насолодитися відпусткою.</p>
 
-              {/* icons grid */}
               <div className="grid grid-cols-3 gap-6 mb-12">
                 {
                   facilities.map((item, index) =>
@@ -376,10 +374,8 @@ const RoomDetails = () => {
           </div>
 
 
-          {/* ➡️➡️➡️ right side ➡️➡️➡️ */}
           <div className='w-full lg:w-[40%] h-full'>
 
-            {/* reservation */}
             <div className='py-8 px-6 bg-accent/20 mb-12'>
 
               <form onSubmit={handleReservationSubmit}>
@@ -393,7 +389,6 @@ const RoomDetails = () => {
                     <input
                       type='text'
                       name='name'
-                      // defaultValue='John Smith'
                       placeholder='Ваше імʼя'
                       className='w-full h-full bg-white px-6 outline-none'
                       required
@@ -401,9 +396,18 @@ const RoomDetails = () => {
                   </div>
                   <div className='h-[60px]'>
                     <input
+                      type='email'
+                      name='email'
+                      placeholder='Ваш email'
+                      className='w-full h-full bg-white px-6 outline-none'
+                      autoComplete='email'
+                      required
+                    />
+                  </div>
+                  <div className='h-[60px]'>
+                    <input
                       type='tel'
                       name='phone'
-                      // defaultValue='+380991112233'
                       placeholder='Ваш номер телефону'
                       className='w-full h-full bg-white px-6 outline-none'
                       pattern='^\+?[0-9\s()\-]{10,20}$'

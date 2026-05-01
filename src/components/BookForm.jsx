@@ -13,6 +13,7 @@ const BookForm = () => {
     children: 1,
     roomType: 'luxary',
     name: 'John Smith',
+    email: 'john@example.com',
     phone: '+380991112233',
     status: 'booked',
   });
@@ -128,6 +129,22 @@ const BookForm = () => {
             value={bookingData.name}
             onChange={handleInputChange}
             placeholder='John Smith'
+            className='w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent'
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor='email' className='block mb-1 text-sm font-medium text-primary'>
+            Email
+          </label>
+          <input
+            id='email'
+            name='email'
+            type='email'
+            value={bookingData.email}
+            onChange={handleInputChange}
+            placeholder='john@example.com'
             className='w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent'
             required
           />

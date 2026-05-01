@@ -8,6 +8,7 @@ export { default as CheckIn } from './CheckIn';
 export { default as Footer } from './Footer';
 export { default as Header } from './Header';
 export { default as Rooms } from './Rooms';
+export { default as Contacts } from './Contacts';
 export { default as Room } from './Room';
 
 export { default as ScrollToTop } from '../utils/ScrollToTop';

@@ -5,21 +5,10 @@ import { Home, RoomDetails, Login, Admin } from './pages';
 
 const App = () => {
 
-  // const paths = [
-  //   { path: '/', element: <Home /> },
-  //   { path: '/room/:id', element: <RoomDetails /> },
-  //   { path: '*', element: <PageNotFound /> },
-  // ]
-
-  // const router = createBrowserRouter(paths);
-  // <RouterProvider router={router} /> 
-
   return (
 
     <main className=''>
       <BrowserRouter>
-
-        {/* <Header /> */}
 
         <Routes>
           <Route path={'/'} element={<Home />} />

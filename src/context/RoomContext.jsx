@@ -1,14 +1,37 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { roomData } from "../db/data";
 
+const COTTAGES_API_URL = 'https://api.runabooking.me/api/cottages/';
 
 const RoomInfo = createContext();
 
 
 export const RoomContext = ({ children }) => {
 
-  const [rooms, setRooms] = useState(roomData);
-  const [loading, setLoading] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [allRooms, setAllRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchCottages = async () => {
+      try {
+        const response = await fetch(COTTAGES_API_URL, { signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+        const cottages = Array.isArray(data) ? data : (data?.data ?? []);
+        setRooms(cottages);
+        setAllRooms(cottages);
+      } catch (error) {
+        if (error.name !== 'AbortError') console.error('Failed to load cottages:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCottages();
+    return () => controller.abort();
+  }, []);
 
   const [adults, setAdults] = useState('1 дорослий');
   const [kids, setKids] = useState('0 дітей');
@@ -25,21 +48,19 @@ export const RoomContext = ({ children }) => {
     setKids('0 дітей');
     setCheckIn(null);
     setCheckOut(null);
-    setRooms(roomData)
+    setRooms(allRooms);
   };
 
 
-  // user click at --> Check Now button... then execute this function...
   const handleCheck = (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // filter rooms based on total persons...
-    const filterRooms = roomData.filter(room => total <= room.maxPerson)
+    const filterRooms = allRooms.filter(room => total <= (room.maxGuests ?? room.maxPerson))
 
     setTimeout(() => {
       setLoading(false);
-      setRooms(filterRooms); // refresh UI with new filtered rooms after 3 second...
+      setRooms(filterRooms);
     }, 3000);
   }
 

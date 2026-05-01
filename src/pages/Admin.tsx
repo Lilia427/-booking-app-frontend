@@ -57,7 +57,6 @@ const Admin: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
-  // Cottages state
   const [cottages, setCottages] = useState<Cottage[]>([])
   const [cottagesLoading, setCottagesLoading] = useState(false)
   const [cottagesError, setCottagesError] = useState('')
@@ -360,7 +359,6 @@ const Admin: React.FC = () => {
         },
       })
     } catch {
-      // proceed with local logout even if API call fails
     } finally {
       localStorage.removeItem('admin_token')
       navigate('/')
@@ -436,7 +434,6 @@ const Admin: React.FC = () => {
   return (
     <section className='flex flex-col h-screen bg-slate-900 overflow-hidden'>
 
-      {/* Top bar */}
       <div className='shrink-0 bg-slate-950 border-b border-slate-700/60 px-8 py-4 flex items-center justify-between'>
         <div className='flex items-center gap-3'>
           <div className='h-8 w-1 rounded-full bg-accent' />
@@ -450,7 +447,6 @@ const Admin: React.FC = () => {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className='shrink-0 bg-slate-900 border-b border-slate-700/60 px-8 flex gap-1'>
         {(['reservations', 'cottages'] as Tab[]).map((tab) => (
           <button
@@ -470,7 +466,6 @@ const Admin: React.FC = () => {
       <div className='flex flex-1 flex-col overflow-hidden px-8 py-6'>
 
         {activeTab === 'reservations' && (<>
-        {/* Header row */}
         <div className='mb-5 shrink-0 flex items-center justify-between'>
           <div>
             <h2 className='text-2xl font-bold text-white'>Reservations</h2>
@@ -482,7 +477,6 @@ const Admin: React.FC = () => {
           </div>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className='flex flex-1 items-center justify-center gap-3'>
             <div className='h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-slate-200' />
@@ -490,21 +484,18 @@ const Admin: React.FC = () => {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className='rounded-xl border border-red-700 bg-red-900/30 px-6 py-4 text-sm text-red-400'>
             {error}
           </div>
         )}
 
-        {/* Empty */}
         {!loading && !error && reservations.length === 0 && (
           <div className='flex flex-1 items-center justify-center'>
             <p className='text-slate-500 text-lg'>No reservations yet.</p>
           </div>
         )}
 
-        {/* Table */}
         {!loading && reservations.length > 0 && (
           <div className='flex-1 overflow-auto rounded-2xl ring-1 ring-slate-700 shadow-2xl'>
             <table className='min-w-full divide-y divide-slate-700/50 text-xl'>
@@ -698,7 +689,6 @@ const Admin: React.FC = () => {
 
       </div>
 
-      {/* Edit modal */}
       {editingId !== null && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm'>
           <div className='w-full max-w-lg rounded-2xl bg-slate-800 p-8 shadow-2xl ring-1 ring-slate-700'>
@@ -766,7 +756,6 @@ const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* Cottage edit modal */}
       {editingCottageId !== null && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm'>
           <div className='w-full max-w-lg rounded-2xl bg-slate-800 p-8 shadow-2xl ring-1 ring-slate-700'>

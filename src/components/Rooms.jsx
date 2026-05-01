@@ -11,7 +11,6 @@ const Rooms = () => {
     <section className='py-24'>
 
       {
-        // overlay & spinner effect
         loading &&
         <div className='h-screen w-full fixed bottom-0 top-0 bg-black/80 z-50 grid place-items-center'>
           <SpinnerDotted />

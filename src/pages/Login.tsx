@@ -7,7 +7,6 @@ const DEFAULT_ADMIN_PASSWORD = 'admin12345'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
-  // const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState(DEFAULT_ADMIN_EMAIL)
   const [password, setPassword] = useState(DEFAULT_ADMIN_PASSWORD)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,18 +61,6 @@ const Login: React.FC = () => {
         >
           <h1 className='mb-2 text-center text-3xl font-semibold text-slate-900'>Admin Login</h1>
           <p className='mb-6 text-center text-sm text-slate-600'>Sign in to your admin dashboard.</p>
-
-          {/* <label className='mb-4 block'>
-            <span className='mb-1 block text-sm font-medium text-slate-700'>Full Name</span>
-            <input
-              type='text'
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              className='w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300'
-              placeholder='Enter your full name'
-            />
-          </label> */}
 
           <label className='mb-4 block'>
             <span className='mb-1 block text-sm font-medium text-slate-700'>Email</span>
